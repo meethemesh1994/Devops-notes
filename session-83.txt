@@ -1,0 +1,128 @@
+black box monitoring -> we dont anything inside system, we test it as external user like end points are up and running and SSL certificates expiry, etc
+white box monitoring -> We know everything inside syste, like metrics, traces, logs, events, etc...
+
+1. create terraform.tfvars. create slack channel, slack app. provide app password, slack webhook URL
+2. login to frontend
+	cd /tmp/expense-frontend/
+    ls -l
+    sudo sh cert-demo.sh
+3. login to backend
+	 sudo sed -i 's/ENABLE_DEBUG_ROUTES=false/ENABLE_DEBUG_ROUTES=true/' /app/.env
+	 sudo systemctl restart backend
+4. login to frontend
+	cd scripts
+	sh load-healthy-traffic.sh http://localhost
+	sh load-fault-traffic.sh http://localhost
+	
+
+Containers approach
+====================
+counter -> always increasing like age, odometer, data usage, etc. we can reset to 0
+gauge -> instant values either decreasing or increasing like speed
+histogram -> http_request_duration_seconds
+	it is thw way of sorting the observations into different buckets, for example http request duration seconds, we can create multiple buckets
+
+p95 -> how much duration 95% requests of the requests took
+	
+rate function -> always calculates on counter metric. per sec or per hr
+
+odometer
+120km -> 5th min
+125km -> 10th min
+
+5km in 5min -> 60kmph
+
+power meters
+sep 1st -> 2000units
+oct 1st -> 2500units
+500unites/month
+
+prometheus calculates rate function on per second
+
+app-password
+slack URL
+
+
+#!/bin/bash
+
+growpart /dev/nvme0n1 4
+lvextend -r -L +30G /dev/mapper/RootVG-varVol
+xfs_growfs /var
+
+# Manual Way to extend
+# growpart /dev/nvme0n1 4
+# lvextend -r -L +30G /dev/mapper/RootVG-varVol
+# xfs_growfs /var
+
+dnf -y install dnf-plugins-core
+dnf config-manager --add-repo https://download.docker.com/linux/rhel/docker-ce.repo
+dnf install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
+
+systemctl start docker
+systemctl enable docker
+usermod -aG docker ec2-user
+
+SLI -> the acutal measured number based on which we can say application is as per our standards or not. latency and availability(app should be available 99% of the time)
+SLO -> service level objective. internal agreement with in our team. 99.5% of the requests should be in 300ms
+SLA -> promise to our client, failing this we need to pay penalities. for example 99% availability and latency is 500ms
+
+1000 requests
+995 requests -> success
+5 requests -> allowed failure
+0.5% error budget
+
+990 requests -> success
+10 requests -> failure
+
+fraction(out of 1) and percentage(for 100)
+3/4 -> 0.75 -> 75%
+
+990/1000 -> success -> 99
+failure -> 1
+
+budget consumed = 1/0.5 = 2 = 200%
+we consumed 2X more than our budget
+
+SLI = 990/100 = 99
+SLO = 995/1000 = 99.5
+budget consumed = (1-SLI)/(1-SLO)
+ 1-99/1-99.5
+ 
+100 requests
+============
+SLO = 99.5
+error budget = 0.5%
+
+98 requests -> success
+2 failure
+SLI -> 98/100 -> 0.98
+SLO -> 99.5/100 -> 0.995
+
+budget consumed = (1-SLI)/(1-SLO)
+                = 0.02/0.005
+				= 4
+				= 400%
+we consumed 4X more than allowed budget
+budget remaining = (SLI-SLO)/(1-SLO)*100
+				= 0.98-0.995/0.005
+				= -3
+				= -300
+we have -300% budget remaining
+
+if SLO/SLA is for month, we are safe if the errors on end of the month.. burn rate is important
+
+budget -> 10,000
+1st day -> 333
+burn rate = (SLI-SLO)/(1-SLO)
+          = 3
+		  
+30 days is the SLA/SLO period
+3/30 -> 10 days
+
+
+sum(rate(http_requests_total[5m])) by (route)
+method, route, status-code
+
+
+histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, method, route))
+
