@@ -1,0 +1,24 @@
+1. knows
+2. does
+
+what agent knows, configuration(confidential and not confidential), tools, knowledge base
+does -> what agent should does
+
+LLM -> more parameters (trained on more data)
+SLM -> less parameters(security, we can host in our infra)
+
+agent -> SLM/LLM
+
+claude/chatgpt -> public and cloud services
+
+curl -X POST http://localhost:8080/investigate \
+  -H 'Content-Type: application/json' \
+  -d '{"alert_name": "MySQLDown", "labels": {"severity": "critical"}}'
+
+PR agent
+========
+knows -> repo URL, write access to agent for PR
+
+curl -X POST http://localhost:8080/ask \
+  -H 'Content-Type: application/json' \
+  -d '{"question": "investigate a recent high latency request and tell me the reason"}'
