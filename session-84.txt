@@ -1,0 +1,32 @@
+opentelemetry
+=============
+industry standard common interface for observability, it is vendor neutral. it created a common protocol to collect, process and export the metrics to different backends we can choose
+
+in a full request, app teams create a trace id, everything is span inside trace. for example frontend is one span, backend is one span
+
+exemplers
+=========
+are trace refereences attached to specific request in histogram since histogram cant store each and every request. exemplers tags with trace id when the latency graph started, we can click exemplers to go to traces...
+
+Human flow
+===========
+if alert comes. we go to metrics, logs, traces query them understand where the problem is going on
+	container logs
+	source code
+	error -> google
+	which component has problem
+	brain = human+google
+	
+AI Agent -> a simple program on behalf of human that interacts with LLM(Large language model). Plan Execute Review. Agent have access to tools and knowledge base(app and config code, eks cluster info, agent read access, traces, logs and metrics. you can find the endpoints in docker compose config)
+
+agent sends the error to LLM. LLM asks agent to follow some steps and update the result back. LLM checks the result and ask agent to do further actions. this goes on multiple iterations...
+
+GPT -> text engine. we ask something it will respond
+
+claude code -> useful to generate code in our local
+claude api -> agent needs API calling to connect with claude
+
+claude.md
+spec.md
+
+I want you to create a spec.md or claude.md. I have a docker host running inside AWS EC2. I have there an expense 3 tier app. frontend is reactjs into nginx server, backend is nodejs, database is mysql. anyuser can signup, sign in, create and read their daily expense. I setup observability to this application. I am using prometheus, alert manager, nginx, mysql exporters, c advisor, otel collector to collect traces and process to backend to tempo, alloy to collect logs and store in loki. I have grafana added all data sources to it prometheus, tempo, loki. I have code base in github public repos. I configured alert manager in prometheus. it sends alerts to slack when something is wrong like mysqldown, p99 high latency, more 500 requests. now I want agent in python to be hosted in the same docker host so that it can easily access all the tools, continously checking prometheus for alerts, if it find alert I need agent to get rca into slack. when it finds alert it should immidiately post in slack as it found alert and investigation is going, when rca is completed it should post back. I want rca summary and detailed rca.
